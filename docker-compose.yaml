@@ -1,0 +1,8 @@
+
+services:
+  shopease:
+    build: .
+    container_name: shopease-app
+    ports:
+      - "8081:80"
+    restart: unless-stopped
