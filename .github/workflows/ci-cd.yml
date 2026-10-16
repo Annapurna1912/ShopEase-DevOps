@@ -1,5 +1,5 @@
 
-name: ShopEase CI
+name: ShopEase CI/CD
 
 on:
   push:
@@ -20,3 +20,18 @@ jobs:
 
       - name: Build Docker image
         run: docker build -t shopease:${{ github.sha }} .
+
+      - name: Log in to Docker Hub
+        if: github.event_name == 'push' && github.ref == 'refs/heads/main'
+        uses: docker/login-action@v3
+        with:
+          username: ${{ secrets.DOCKERHUB_USERNAME }}
+          password: ${{ secrets.DOCKERHUB_TOKEN }}
+
+      - name: Push Docker image
+        if: github.event_name == 'push' && github.ref == 'refs/heads/main'
+        run: |
+          docker tag shopease:${{ github.sha }} ${{ secrets.DOCKERHUB_USERNAME }}/shopease:latest
+          docker tag shopease:${{ github.sha }} ${{ secrets.DOCKERHUB_USERNAME }}/shopease:${{ github.sha }}
+          docker push ${{ secrets.DOCKERHUB_USERNAME }}/shopease:latest
+          docker push ${{ secrets.DOCKERHUB_USERNAME }}/shopease:${{ github.sha }}
